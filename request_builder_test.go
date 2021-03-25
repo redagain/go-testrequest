@@ -13,8 +13,8 @@ import (
 	"testing"
 )
 
-func Test_InitBuilder(t *testing.T) {
-	want := &builder{
+func Test_Builder(t *testing.T) {
+	want := &requestBuilder{
 		target:  defaultTarget,
 		method:  http.MethodGet,
 		headers: map[string][]string{},
@@ -26,7 +26,7 @@ func Test_InitBuilder(t *testing.T) {
 	}
 }
 
-func Test_builder_SetTarget(t *testing.T) {
+func Test_requestBuilder_SetTarget(t *testing.T) {
 	want := "http://example.com"
 	req := Builder().SetTarget(want).Request()
 	got := req.RequestURI
@@ -35,7 +35,7 @@ func Test_builder_SetTarget(t *testing.T) {
 	}
 }
 
-func Test_builder_SetMethod(t *testing.T) {
+func Test_requestBuilder_SetMethod(t *testing.T) {
 	want := http.MethodPatch
 	req := Builder().SetMethod(want).Request()
 	got := req.Method
@@ -44,7 +44,7 @@ func Test_builder_SetMethod(t *testing.T) {
 	}
 }
 
-func Test_builder_SetQuery(t *testing.T) {
+func Test_requestBuilder_SetQuery(t *testing.T) {
 	req := Builder().SetQuery(url.Values{"test": {"test"}}).Request()
 	want := url.Values{"test": {"test"}}
 	got := req.URL.Query()
@@ -54,7 +54,7 @@ func Test_builder_SetQuery(t *testing.T) {
 	}
 }
 
-func Test_builder_SetQueryValue(t *testing.T) {
+func Test_requestBuilder_SetQueryValue(t *testing.T) {
 	key := "test"
 	req := Builder().SetQueryValue(key, "test").Request()
 	got := req.URL.Query()
@@ -65,7 +65,7 @@ func Test_builder_SetQueryValue(t *testing.T) {
 	}
 }
 
-func Test_builder_SetQueryValues(t *testing.T) {
+func Test_requestBuilder_SetQueryValues(t *testing.T) {
 	key := "test"
 	req := Builder().SetQueryValue(key, "test1", "test2").Request()
 	got := req.URL.Query()
@@ -76,7 +76,7 @@ func Test_builder_SetQueryValues(t *testing.T) {
 	}
 }
 
-func Test_builder_SetHeader(t *testing.T) {
+func Test_requestBuilder_SetHeader(t *testing.T) {
 	req := Builder().SetHeader("test", "test").Request()
 	want := http.Header{}
 	want.Set("test", "test")
@@ -86,7 +86,7 @@ func Test_builder_SetHeader(t *testing.T) {
 	}
 }
 
-func Test_builder_SetHeaderValues(t *testing.T) {
+func Test_requestBuilder_SetHeaderValues(t *testing.T) {
 	req := Builder().SetHeader("test", "test1", "test2").Request()
 	want := http.Header{}
 	want.Add("test", "test1")
@@ -97,7 +97,7 @@ func Test_builder_SetHeaderValues(t *testing.T) {
 	}
 }
 
-func Test_builder_SetContentType(t *testing.T) {
+func Test_requestBuilder_SetContentType(t *testing.T) {
 	req := Builder().SetContentType("application/json").Request()
 	want := "application/json"
 	got := req.Header.Get("Content-Type")
@@ -106,17 +106,8 @@ func Test_builder_SetContentType(t *testing.T) {
 	}
 }
 
-func Test_builder_SetContentTypeWithParam(t *testing.T) {
-	req := Builder().SetContentTypeWithParam("application/json", CharsetUTF8).Request()
-	want := "application/json;charset=UTF-8"
-	got := req.Header.Get("Content-Type")
-	if got != want {
-		t.Errorf("SetContentType() = %v, want %v", got, want)
-	}
-}
-
-func Test_builder_SetCookie(t *testing.T) {
-	req := Builder().SetCookie(&http.Cookie{Name: "test", Value: "test"}).Request()
+func Test_requestBuilder_SetSingleCookie(t *testing.T) {
+	req := Builder().SetCookies(&http.Cookie{Name: "test", Value: "test"}).Request()
 	want := []*http.Cookie{{
 		Name:  "test",
 		Value: "test",
@@ -127,9 +118,9 @@ func Test_builder_SetCookie(t *testing.T) {
 	}
 }
 
-func Test_builder_SetCookies(t *testing.T) {
+func Test_requestBuilder_SetCookies(t *testing.T) {
 	req := Builder().
-		SetCookie(&http.Cookie{Name: "test1", Value: "test1"}, &http.Cookie{Name: "test2", Value: "test2"}).Request()
+		SetCookies(&http.Cookie{Name: "test1", Value: "test1"}, &http.Cookie{Name: "test2", Value: "test2"}).Request()
 	want := []*http.Cookie{{
 		Name:  "test1",
 		Value: "test1",
@@ -144,7 +135,7 @@ func Test_builder_SetCookies(t *testing.T) {
 	}
 }
 
-func Test_builder_SetContext(t *testing.T) {
+func Test_requestBuilder_SetContext(t *testing.T) {
 	req := Builder().SetContext(context.Background()).Request()
 	got := req.Context()
 	want := context.Background()
@@ -153,7 +144,7 @@ func Test_builder_SetContext(t *testing.T) {
 	}
 }
 
-func Test_builder_SetContextValue(t *testing.T) {
+func Test_requestBuilder_SetContextValue(t *testing.T) {
 	key := "test"
 	value := "test"
 	req := Builder().SetContextValue(key, value).Request()
@@ -169,7 +160,7 @@ func Test_builder_SetContextValue(t *testing.T) {
 	}
 }
 
-func Test_builder_SetUserAgent(t *testing.T) {
+func Test_requestBuilder_SetUserAgent(t *testing.T) {
 	req := Builder().SetUserAgent("test").Request()
 	want := "test"
 	got := req.UserAgent()
@@ -178,7 +169,7 @@ func Test_builder_SetUserAgent(t *testing.T) {
 	}
 }
 
-func Test_builder_SetAuth(t *testing.T) {
+func Test_requestBuilder_SetAuth(t *testing.T) {
 	req := Builder().SetAuth("bearer", "test").Request()
 	want := "bearer test"
 	got := req.Header.Get("Authorization")
@@ -187,7 +178,7 @@ func Test_builder_SetAuth(t *testing.T) {
 	}
 }
 
-func Test_builder_SetBasicAuth(t *testing.T) {
+func Test_requestBuilder_SetBasicAuth(t *testing.T) {
 	req := Builder().SetBasicAuth("admin", "p@ssw0rd").Request()
 	wantUsername := "admin"
 	wantPassword := "p@ssw0rd"
@@ -206,7 +197,7 @@ func Test_builder_SetBasicAuth(t *testing.T) {
 	}
 }
 
-func Test_builder_SetBody(t *testing.T) {
+func Test_requestBuilder_SetBody(t *testing.T) {
 	req := Builder().SetBody(strings.NewReader("test")).Request()
 	want := []byte("test")
 	got, _ := io.ReadAll(req.Body)
@@ -215,7 +206,7 @@ func Test_builder_SetBody(t *testing.T) {
 	}
 }
 
-func Test_builder_SetPostForm(t *testing.T) {
+func Test_requestBuilder_SetPostForm(t *testing.T) {
 	req := Builder().SetPostForm(url.Values{"test": {"test"}}).Request()
 	want := url.Values{"test": {"test"}}
 	req.ParseForm()
@@ -233,7 +224,7 @@ func Test_builder_SetPostForm(t *testing.T) {
 	}
 }
 
-func Test_builder_SetPostFormValue(t *testing.T) {
+func Test_requestBuilder_SetPostFormValue(t *testing.T) {
 	req := Builder().SetPostFormValue("test", "test").Request()
 	want := url.Values{"test": {"test"}}
 	req.ParseForm()
@@ -243,7 +234,7 @@ func Test_builder_SetPostFormValue(t *testing.T) {
 	}
 }
 
-func Test_builder_SetJSON(t *testing.T) {
+func Test_requestBuilder_SetJSON(t *testing.T) {
 	req := Builder().SetJSON([]byte("{}")).Request()
 	want := []byte("{}")
 	got, _ := io.ReadAll(req.Body)
@@ -260,7 +251,7 @@ func Test_builder_SetJSON(t *testing.T) {
 	}
 }
 
-func Test_builder_SetJSONWithPreset(t *testing.T) {
+func Test_requestBuilder_SetJSONWithPreset(t *testing.T) {
 	req := Builder().SetMethod(http.MethodPut).
 		SetContentType("application/json").
 		SetJSON([]byte("{}")).
@@ -274,7 +265,7 @@ func Test_builder_SetJSONWithPreset(t *testing.T) {
 	}
 }
 
-func Test_builder_SetJSONFromValue(t *testing.T) {
+func Test_requestBuilder_SetJSONFromValue(t *testing.T) {
 	type value struct {
 		Value string `json:"value"`
 	}
