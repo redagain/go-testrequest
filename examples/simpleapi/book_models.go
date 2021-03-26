@@ -27,13 +27,6 @@ func (req *BookRequest) IsValid() (ok bool) {
 
 func NewBookRequest(req *http.Request) (*BookRequest, error) {
 	ct := req.Header.Get("Content-Type")
-	if strings.HasPrefix(ct, "application/x-www-form-urlencoded") {
-		return &BookRequest{
-			Title:   req.PostFormValue("title"),
-			ISBN:    req.PostFormValue("isbn"),
-			Authors: req.PostForm["authors"],
-		}, nil
-	}
 	if strings.HasPrefix(ct, "application/json") {
 		b := &BookRequest{}
 		err := json.NewDecoder(req.Body).Decode(b)

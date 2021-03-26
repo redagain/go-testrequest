@@ -94,22 +94,6 @@ func TestNewBookRequest(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "FromPostForm",
-			args: args{
-				req: testrequest.Builder().
-					SetPostFormValue("title", "The Go Programming Language").
-					SetPostFormValue("isbn", "978-0134190440").
-					SetPostFormValue("authors", "Alan A. A. Donovan", "Brian W. Kernighan").
-					Request(),
-			},
-			want: &BookRequest{
-				Title:   "The Go Programming Language",
-				ISBN:    "978-0134190440",
-				Authors: []string{"Alan A. A. Donovan", "Brian W. Kernighan"},
-			},
-			wantErr: false,
-		},
-		{
 			name: "FromInvalidJSON",
 			args: args{
 				req: testrequest.Builder().
